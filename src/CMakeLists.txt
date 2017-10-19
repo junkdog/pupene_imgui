@@ -17,6 +17,10 @@ hunter_add_package(glew)
 find_package(glew REQUIRED)
 list(APPEND link_libraries glew::glew)
 
+hunter_add_package(glm)
+find_package(glm REQUIRED)
+list(APPEND link_libraries glm)
+
 #    main.cpp
 add_executable(example
     example.cpp

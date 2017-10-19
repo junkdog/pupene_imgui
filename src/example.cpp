@@ -92,8 +92,10 @@ bool render_frame(SDL_Window* window) {
 namespace ui::widget {
 
     template <typename T>
-    void object_editor(T& t, bool debug = false) {
-        do_pup(EditorPupper{}, t, debug);
+    void object_editor(T& t, const std::string& title, bool debug = false) {
+        auto pupper = EditorPupper{title};
+        do_pup(pupper, t, debug);
+        pupper.flush();
     }
 }
 
@@ -112,20 +114,17 @@ int main () {
 
 
     auto vec22 = vec22fi{{10.0f, 4.0f}, {3, 4}};
+    auto ct = complex_thing{};
 
+    auto color = Color{1.f, 0.f, 0.f, 1.f};
     while (!poll_events()) {
         // concluded by render_frame()
-        ImGuiIO& io = ImGui::GetIO();
-
         ImGui_ImplSdlGL3_NewFrame(window);
-
-        static float f = 0.0f;
-        ImGui::InputFloat("float", &f, 0.0f, 1.0f);
 
         bool yes = true;
         ImGui::ShowTestWindow(&yes);
 
-        ui::widget::object_editor(vec2);
+        ui::widget::object_editor(ct, "phat");
         render_frame(window);
     }
 
