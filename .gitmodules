@@ -1,0 +1,6 @@
+[submodule "submodules/imgui"]
+	path = submodules/imgui
+	url = /home/junkdog/opt/dev/imgui
+[submodule "submodules/pupene"]
+	path = submodules/pupene
+	url = /home/junkdog/opt/dev/pupene

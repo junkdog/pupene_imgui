@@ -1,0 +1,10 @@
+.idea
+build
+bin
+_build
+_builds
+cmake-build-debug
+cmake-build-release
+CMakeFiles
+CMakeLists.txt.user
+
