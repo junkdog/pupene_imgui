@@ -2,7 +2,8 @@
 
 #include <pupene/pupene.h>
 #include <imgui/imgui.h>
-#include <bits/unique_ptr.h>
+#include <limits>
+#include <memory>
 #include "puppers.h"
 #include "traits.h"
 
@@ -10,7 +11,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wformat"
 
-template<typename T, typename U>
+template<typename, typename>
 struct input_adapter;
 
 struct bindable {
@@ -19,7 +20,7 @@ struct bindable {
     virtual void update_value() = 0;
     virtual std::unique_ptr<bindable> copy() const = 0;
 
-    virtual int* int_ptr() = 0;
+    virtual void* ptr() = 0; // TODO: variant?
 };
 
 class wrapper {
@@ -28,10 +29,7 @@ public:
     wrapper(const wrapper& w) : self(w.self->copy()) {}
     wrapper(wrapper&&) noexcept = default;
 
-//    template <typename Source, typename Proxy>
-//    wrapper make(Source& s) : self(std::move<input_adapter<Source, Proxy>>(s)) {
-
-    template <typename Source, typename Proxy>
+    template <typename Proxy, typename Source>
     static std::unique_ptr<bindable> make(Source& s) {
         return std::make_unique<input_adapter<Source, Proxy>>(s);
     }
@@ -43,8 +41,8 @@ public:
 
     wrapper& operator=(wrapper&& w) noexcept = default;
 
-    int* int_ptr() {
-        return self->int_ptr();
+    void* ptr() {
+        return self->ptr();
     }
 
     void update() {
@@ -53,9 +51,9 @@ public:
 
 private:
 
-    template<typename T, typename U>
+    template<typename Source, typename Proxy>
     struct input_adapter : bindable {
-        input_adapter(T& t) : actual(t) {
+        input_adapter(Source& t) : actual(t) {
             update_proxy();
         }
 
@@ -64,39 +62,33 @@ private:
         }
 
         void update_proxy() override {
-            massaged = static_cast<U>(actual);
+            proxy = static_cast<Proxy>(actual);
         }
 
         void update_value() override {
-            T t = static_cast<T>(massaged);
-            actual = t;
+            if (std::numeric_limits<Source>::min() > proxy) {
+                actual = std::numeric_limits<Source>::min();
+            } else if (std::numeric_limits<Source>::max() < proxy) {
+                actual = std::numeric_limits<Source>::max();
+            } else {
+                actual = static_cast<Source>(proxy);
+            }
         }
 
         std::unique_ptr<bindable> copy() const override {
-            return std::make_unique<input_adapter<T, U>>(*this);
+            return std::make_unique<input_adapter<Source, Proxy>>(*this);
         }
 
-        int* int_ptr() override {
-            return &massaged;
+        void* ptr() override {
+            return &proxy;
         }
 
-        T& actual;
-        U massaged;
+        Source& actual;
+        Proxy proxy;
     };
 
     std::unique_ptr<bindable> self;
-//    void update() {
-//        T t = static_cast<T>(massaged);
-//        actual = t;
-//    }
-
 };
-//
-//template <typename T>
-//using integer_input =  input_adapter<T, int>();
-//
-//template <typename T>
-//using float_input =  input_adapter<T, float>();
 
 class EditorPupper : public pupene::Pupper<EditorPupper> {
 public:
@@ -126,8 +118,8 @@ public:
     template <typename T,
               typename = enable_if_decimal<T>>
     void pup_impl(T& value, const Meta& meta) {
-        pup_to_widget(value, meta, [&value](auto label) {
-            ImGui::DragFloat(label, &value, 0, 100);
+        pup_to_widget<float>(value, meta, [](auto label, auto ptr) {
+            ImGui::DragFloat(label, ptr, 0, 100);
         });
     }
 
@@ -135,19 +127,13 @@ public:
               typename = void,
               typename = enable_if_integer<T>>
     void pup_impl(T& value, const Meta& meta) {
-//        auto foo = wrapper::make<T, int>(value);
-        auto& b = bindings;
-        pup_to_widget(value, meta, [&b, &value](auto label) {
-            b.emplace_back(wrapper::make<T, int>(value));
-//            bindings.emplace_back(wrapper<int>(value));
-//            bindings.emplace_back(wrapper::make<T, int>(value));
-//            auto& bound = bindings.back();
-            ImGui::DragInt(label, b.back().int_ptr(), 0, 100);
+        pup_to_widget<int>(value, meta, [](auto label, auto ptr) {
+            ImGui::DragInt(label, ptr, 0, 100);
         });
     }
 
     void pup_impl(std::string& value, const Meta& meta) {
-        pup_to_widget(value, meta, [&value](auto label) {
+        to_widget(value, meta, [&value](auto label) {
             ImGui::InputText(label, &value[0], value.capacity());
         });
     }
@@ -162,26 +148,27 @@ private:
     template <typename T, typename Fn>
     void to_widget(T& value,
                    const Meta& meta,
-                   bool push_id,
                    Fn&& wpup) {
 
-        std::string label = prepare(value, meta);
-        if (push_id)
-            ImGui::PushID(&value);
-
         ImGui::PushItemWidth(ImGui::GetContentRegionAvailWidth());
+        std::string label = prepare(value, meta);
         wpup(label.c_str());
         ImGui::PopItemWidth();
 
         ImGui::NextColumn();
     }
 
-    template <typename T, typename Fn>
-    void pup_to_widget(T& value,
+    template <typename PtrType, typename T, typename Fn>
+    void pup_to_widget(T&& value,
                        const Meta& meta,
                        Fn&& wpup) {
 
-        to_widget(value, meta, false, wpup);
+        to_widget(value,
+                  meta,
+                  [&b = bindings, &wpup, &value](auto label) {
+                      b.emplace_back(wrapper::make<PtrType>(value));
+                      wpup(label, static_cast<PtrType*>(b.back().ptr()));
+                  });
     }
 
     template <typename T, typename Fn>
@@ -189,7 +176,10 @@ private:
                           const Meta& meta,
                           Fn&& wpup) {
 
-        to_widget(value, meta, true, wpup);
+        to_widget(value, meta, [&wpup, &value](auto label) {
+            ImGui::PushID(&value);
+            wpup(label);
+        });
     }
 
     void open_window(const std::string& title);

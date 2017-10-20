@@ -22,7 +22,7 @@ template<>
 pupene::PupPolicy EditorPupper::begin_impl(vec2f& value,
                                            const pupene::Meta& meta) {
 
-    object_to_widget(value, meta, [&value](auto label) {
+    object_to_widget(value.x, meta, [&value](auto label) {
         ImGui::InputFloat2(label, &value.x);
     });
 
