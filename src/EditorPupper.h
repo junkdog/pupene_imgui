@@ -2,7 +2,6 @@
 
 #include <pupene/pupene.h>
 #include <imgui/imgui.h>
-#include <imgui/imgui_internal.h>
 #include "puppers.h"
 #include "traits.h"
 
@@ -63,11 +62,14 @@ public:
 
 private:
     template <typename T, typename Fn>
-    void pup_to_widget(T& value,
-                       const Meta& meta,
-                       Fn&& wpup) {
+    void to_widget(T& value,
+                   const Meta& meta,
+                   bool push_id,
+                   Fn&& wpup) {
 
         std::string label = prepare(value, meta);
+        if (push_id)
+            ImGui::PushID(&value);
 
         ImGui::PushItemWidth(ImGui::GetContentRegionAvailWidth());
         wpup(label.c_str());
@@ -77,18 +79,19 @@ private:
     }
 
     template <typename T, typename Fn>
+    void pup_to_widget(T& value,
+                       const Meta& meta,
+                       Fn&& wpup) {
+
+        to_widget(value, meta, false, wpup);
+    }
+
+    template <typename T, typename Fn>
     void object_to_widget(T& value,
-                               const Meta& meta,
-                               Fn&& wpup) {
+                          const Meta& meta,
+                          Fn&& wpup) {
 
-        std::string label = prepare(value, meta);
-        ImGui::PushID(&value);
-
-        ImGui::PushItemWidth(ImGui::GetContentRegionAvailWidth());
-        wpup(label.c_str());
-        ImGui::PopItemWidth();
-
-        ImGui::NextColumn();
+        to_widget(value, meta, true, wpup);
     }
 
     void open_window(const std::string& title);
