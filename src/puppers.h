@@ -35,6 +35,7 @@ struct complex_thing {
     vec2f xy;
     float decimal;
     int32_t integer;
+    uint8_t byte;
     Color color;
     std::string hallo = "omg";
 };
@@ -97,6 +98,7 @@ namespace pupene::fns {
             fpup(v.xy, {"xy"s});
             fpup(v.decimal, {"decimal"s});
             fpup(v.integer, {"integer"s});
+            fpup(v.byte, {"byte"s});
             fpup(v.color, {"color"s});
             fpup(v.hallo, {"hallo"s});
         });
