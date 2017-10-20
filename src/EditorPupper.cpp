@@ -7,18 +7,13 @@ template<>
 PupPolicy EditorPupper::begin_impl(Color& value,
                                    const Meta& meta) {
 
-    prepare(value, meta);
+    object_to_widget(value, meta, [&value](auto title) {
+        int flags = ImGuiColorEditFlags_RGB
+                    | ImGuiColorEditFlags_HEX
+                    | ImGuiColorEditFlags_HSV;
 
-    std::string s{"##"};
-    s.append(meta.name);
-
-    ImGui::PushID(&value);
-    ImGui::ColorEdit4(s.c_str(), &value.r,
-                      ImGuiColorEditFlags_RGB
-                      | ImGuiColorEditFlags_HEX
-                      | ImGuiColorEditFlags_HSV);
-
-    ImGui::NextColumn();
+        ImGui::ColorEdit4(title, &value.r, flags);
+    });
 
     return PupPolicy::consume_object;
 }
@@ -26,15 +21,40 @@ PupPolicy EditorPupper::begin_impl(Color& value,
 template<>
 pupene::PupPolicy EditorPupper::begin_impl(vec2f& value,
                                            const pupene::Meta& meta) {
-    prepare(value, meta);
 
-    std::string s{"##"};
-    s.append(meta.name);
+    object_to_widget(value, meta, [&value](auto title) {
+        ImGui::InputFloat2(title, &value.x);
+    });
 
-    ImGui::PushID(&value);
-    ImGui::InputFloat2(s.c_str(), &value.x);
+    return PupPolicy::consume_object;
+}
+
+void EditorPupper::layout_columns() {
+    ImGui::SetColumnWidth(0, 140);
+    ImGui::SetColumnWidth(1, 90);
+    ImGui::SetColumnWidth(2, 40);
+}
+
+void EditorPupper::open_window(const std::string& title) {
+    bool open = true;
+    std::string s{"Property editor: "};
+    s.append(title);
+
+    if (!ImGui::Begin(s.c_str(), &open)) {
+        ImGui::End();
+        return;
+    }
+
+    ImGui::Columns(4, "title-with-no-end");
+    ImGui::Separator();
+    layout_columns();
+
+    static ImVec4 color = {.25f, .75f, .9f, 1.f};
+    ImGui::TextColored(color, "name"); ImGui::NextColumn();
+    ImGui::TextColored(color, "addr"); ImGui::NextColumn();
+    ImGui::TextColored(color, "size"); ImGui::NextColumn();
 
     ImGui::NextColumn();
 
-    return PupPolicy::consume_object;
+    ImGui::Separator();
 }

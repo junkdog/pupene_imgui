@@ -4,6 +4,7 @@
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
 #include "puppers.h"
+#include "traits.h"
 
 
 #pragma clang diagnostic push
@@ -13,39 +14,11 @@ public:
     using Meta = pupene::Meta;
     using PupPolicy = pupene::PupPolicy;
 
-    template <typename T>
-    using enable_if_decimal = std::enable_if_t<std::is_floating_point<T>{}>;
-
-    template <typename T>
-    using enable_if_integer = std::enable_if_t<std::is_integral<T>{}>;
-
-    EditorPupper(const std::string& title) {
+    explicit EditorPupper(const std::string& title) {
         open_window(title);
     }
 
     ~EditorPupper() override = default;
-
-
-    void layout_columns() {
-        ImGui::SetColumnWidth(0, 140);
-        ImGui::SetColumnWidth(1, 90);
-        ImGui::SetColumnWidth(2, 40);
-//        ImGui::SetColumnWidth(3, 240);
-    }
-
-    template <typename T>
-    void prepare(T& value, const Meta& meta) {
-        ImGui::Text("%s", meta.name.c_str());
-        ImGui::NextColumn();
-
-        ImGui::Text("0x%08x", meta.name.c_str());
-        ImGui::NextColumn();
-
-        ImGui::Text("%d", sizeof(value));
-        ImGui::NextColumn();
-
-        ImGui::PushItemWidth(ImGui::GetContentRegionAvailWidth());
-    }
 
     template <typename T>
     PupPolicy begin_impl(T& value, const Meta& meta) {
@@ -64,33 +37,24 @@ public:
     template <typename T,
               typename = enable_if_decimal<T>>
     void pup_impl(T& value, const Meta& meta) {
-        prepare(value, meta);
-        std::string s{"##"};
-        s.append(meta.name);
-
-        ImGui::DragFloat(s.c_str(), &value, 0, 100);
-        ImGui::NextColumn();
+        pup_to_widget(value, meta, [&value](auto title) {
+            ImGui::DragFloat(title, &value, 0, 100);
+        });
     }
 
     template <typename T,
               typename = void,
               typename = enable_if_integer<T>>
     void pup_impl(T& value, const Meta& meta) {
-        prepare(value, meta);
-        std::string s{"##"};
-        s.append(meta.name);
-
-        ImGui::DragInt(s.c_str(), &value, 0, 100);
-        ImGui::NextColumn();
+        pup_to_widget(value, meta, [&value](auto title) {
+            ImGui::DragInt(title, &value, 0, 100);
+        });
     }
 
     void pup_impl(std::string& value, const Meta& meta) {
-        prepare(value, meta);
-        std::string s{"###"};
-        s.append(meta.name);
-
-        ImGui::InputText(s.c_str(), &value[0], s.capacity());
-        ImGui::NextColumn();
+        pup_to_widget(value, meta, [&value](auto title) {
+            ImGui::InputText(title, &value[0], value.capacity());
+        });
     }
 
     void flush() {
@@ -98,32 +62,55 @@ public:
     }
 
 private:
-    void open_window(const std::string& title) {
-        bool open = true;
-        std::string s{"Property editor: "};
-        s.append(title);
+    template <typename T, typename Fn>
+    void pup_to_widget(T& value,
+                       const Meta& meta,
+                       Fn&& wpup) {
 
-        if (!ImGui::Begin(s.c_str(), &open)) {
-            ImGui::End();
-            return;
-        }
+        prepare(value, meta);
+        std::string s{"##"};
+        s.append(meta.name);
 
-//        layout_columns();
-        ImGui::Columns(4, "title-with-no-end");
-        ImGui::Separator();
-        layout_columns();
-
-        static ImVec4 color = {.25f, .75f, .9f, 1.f};
-        ImGui::TextColored(color, "name"); ImGui::NextColumn();
-        ImGui::TextColored(color, "addr"); ImGui::NextColumn();
-        ImGui::TextColored(color, "size"); ImGui::NextColumn();
+        ImGui::PushItemWidth(ImGui::GetContentRegionAvailWidth());
+        wpup(s.c_str());
+        ImGui::PopItemWidth();
 
         ImGui::NextColumn();
-
-        ImGui::Separator();
-
-//        ImGui::Text(""); ImGui::NextColumn();
     }
+
+    template <typename T, typename Fn>
+    void object_to_widget(T& value,
+                               const Meta& meta,
+                               Fn&& wpup) {
+
+        prepare(value, meta);
+        ImGui::PushID(&value);
+
+        std::string s{"##"};
+        s.append(meta.name);
+
+        ImGui::PushItemWidth(ImGui::GetContentRegionAvailWidth());
+        wpup(meta.name.c_str());
+        ImGui::PopItemWidth();
+
+        ImGui::NextColumn();
+    }
+
+    void open_window(const std::string& title);
+
+    template <typename T>
+    void prepare(T& value, const Meta& meta) {
+        ImGui::Text("%s", meta.name.c_str());
+        ImGui::NextColumn();
+
+        ImGui::Text("0x%08x", meta.name.c_str());
+        ImGui::NextColumn();
+
+        ImGui::Text("%d", sizeof(value));
+        ImGui::NextColumn();
+    }
+
+    void layout_columns();
 };
 
 template <>
