@@ -37,8 +37,8 @@ public:
     template <typename T,
               typename = enable_if_decimal<T>>
     void pup_impl(T& value, const Meta& meta) {
-        pup_to_widget(value, meta, [&value](auto title) {
-            ImGui::DragFloat(title, &value, 0, 100);
+        pup_to_widget(value, meta, [&value](auto label) {
+            ImGui::DragFloat(label, &value, 0, 100);
         });
     }
 
@@ -46,14 +46,14 @@ public:
               typename = void,
               typename = enable_if_integer<T>>
     void pup_impl(T& value, const Meta& meta) {
-        pup_to_widget(value, meta, [&value](auto title) {
-            ImGui::DragInt(title, &value, 0, 100);
+        pup_to_widget(value, meta, [&value](auto label) {
+            ImGui::DragInt(label, &value, 0, 100);
         });
     }
 
     void pup_impl(std::string& value, const Meta& meta) {
-        pup_to_widget(value, meta, [&value](auto title) {
-            ImGui::InputText(title, &value[0], value.capacity());
+        pup_to_widget(value, meta, [&value](auto label) {
+            ImGui::InputText(label, &value[0], value.capacity());
         });
     }
 
@@ -67,10 +67,10 @@ private:
                        const Meta& meta,
                        Fn&& wpup) {
 
-        std::string title = prepare(value, meta);
+        std::string label = prepare(value, meta);
 
         ImGui::PushItemWidth(ImGui::GetContentRegionAvailWidth());
-        wpup(title.c_str());
+        wpup(label.c_str());
         ImGui::PopItemWidth();
 
         ImGui::NextColumn();
@@ -81,11 +81,11 @@ private:
                                const Meta& meta,
                                Fn&& wpup) {
 
-        std::string title = prepare(value, meta);
+        std::string label = prepare(value, meta);
         ImGui::PushID(&value);
 
         ImGui::PushItemWidth(ImGui::GetContentRegionAvailWidth());
-        wpup(title.c_str());
+        wpup(label.c_str());
         ImGui::PopItemWidth();
 
         ImGui::NextColumn();

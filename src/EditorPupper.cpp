@@ -7,12 +7,12 @@ template<>
 PupPolicy EditorPupper::begin_impl(Color& value,
                                    const Meta& meta) {
 
-    object_to_widget(value, meta, [&value](auto title) {
+    object_to_widget(value, meta, [&value](auto label) {
         int flags = ImGuiColorEditFlags_RGB
                     | ImGuiColorEditFlags_HEX
                     | ImGuiColorEditFlags_HSV;
 
-        ImGui::ColorEdit4(title, &value.r, flags);
+        ImGui::ColorEdit4(label, &value.r, flags);
     });
 
     return PupPolicy::consume_object;
@@ -22,8 +22,8 @@ template<>
 pupene::PupPolicy EditorPupper::begin_impl(vec2f& value,
                                            const pupene::Meta& meta) {
 
-    object_to_widget(value, meta, [&value](auto title) {
-        ImGui::InputFloat2(title, &value.x);
+    object_to_widget(value, meta, [&value](auto label) {
+        ImGui::InputFloat2(label, &value.x);
     });
 
     return PupPolicy::consume_object;
