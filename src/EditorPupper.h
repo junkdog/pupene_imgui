@@ -67,12 +67,10 @@ private:
                        const Meta& meta,
                        Fn&& wpup) {
 
-        prepare(value, meta);
-        std::string s{"##"};
-        s.append(meta.name);
+        std::string title = prepare(value, meta);
 
         ImGui::PushItemWidth(ImGui::GetContentRegionAvailWidth());
-        wpup(s.c_str());
+        wpup(title.c_str());
         ImGui::PopItemWidth();
 
         ImGui::NextColumn();
@@ -83,14 +81,11 @@ private:
                                const Meta& meta,
                                Fn&& wpup) {
 
-        prepare(value, meta);
+        std::string title = prepare(value, meta);
         ImGui::PushID(&value);
 
-        std::string s{"##"};
-        s.append(meta.name);
-
         ImGui::PushItemWidth(ImGui::GetContentRegionAvailWidth());
-        wpup(meta.name.c_str());
+        wpup(title.c_str());
         ImGui::PopItemWidth();
 
         ImGui::NextColumn();
@@ -99,7 +94,7 @@ private:
     void open_window(const std::string& title);
 
     template <typename T>
-    void prepare(T& value, const Meta& meta) {
+    std::string prepare(T& value, const Meta& meta) {
         ImGui::Text("%s", meta.name.c_str());
         ImGui::NextColumn();
 
@@ -108,6 +103,11 @@ private:
 
         ImGui::Text("%d", sizeof(value));
         ImGui::NextColumn();
+
+        std::string title{"##"};
+        title.append(meta.name);
+
+        return title;
     }
 
     void layout_columns();
