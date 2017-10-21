@@ -36,6 +36,15 @@ static SDL_DisplayMode create_display() {
 
 static void init_imgui(SDL_Window* window) {
     ImGui_ImplSdlGL3_Init(window);
+
+    auto io = ImGui::GetIO();
+
+    ImFontConfig config;
+    config.OversampleH = 3;
+    config.OversampleV = 2;
+    config.GlyphExtraSpacing.x = 1.0f;
+
+    io.Fonts->AddFontFromFileTTF("../../SourceCodePro-Semibold.ttf", 14.0f, &config);
 }
 
 static SDL_Window* create_window() {

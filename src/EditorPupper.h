@@ -1,8 +1,8 @@
 #pragma once
 
+#include <algorithm>
 #include <pupene/pupene.h>
 #include <imgui/imgui.h>
-#include <limits>
 #include <memory>
 #include "puppers.h"
 #include "traits.h"
@@ -27,10 +27,13 @@ public:
         prepare(value, meta);
         ImGui::NextColumn();
 
+        depth++;
+
         return PupPolicy::pup_object;
     }
 
     void end_impl() {
+        depth--;
         ImGui::PopID();
     }
 
@@ -63,17 +66,18 @@ public:
 
 private:
     std::vector<wrapper> bindings;
+    int depth = -1;
 
     template <typename T, typename Fn>
     void to_widget(T& value,
                    const Meta& meta,
                    Fn&& wpup) {
 
-        ImGui::PushItemWidth(ImGui::GetContentRegionAvailWidth());
         std::string label = prepare(value, meta);
+
+        ImGui::PushItemWidth(ImGui::GetContentRegionAvailWidth());
         wpup(label.c_str());
         ImGui::PopItemWidth();
-
         ImGui::NextColumn();
     }
 
@@ -99,13 +103,17 @@ private:
             ImGui::PushID(&value);
             wpup(label);
         });
+        depth++;
     }
 
     void open_window(const std::string& title);
 
     template <typename T>
     std::string prepare(T& value, const Meta& meta) {
-        ImGui::Text("%s", meta.name.c_str());
+        // FIXME: indent not working with columns (i think)
+        auto indent = std::max(0, depth) * 2;
+        std::string s(indent, ' ');
+        ImGui::Text("%s%s", s.c_str(), meta.name.c_str());
         ImGui::NextColumn();
 
 #pragma clang diagnostic push
@@ -114,12 +122,12 @@ private:
         ImGui::NextColumn();
 #pragma clang diagnostic pop
 
-        ImGui::Text("%d", static_cast<int>(sizeof(value)));
+        ImGui::Text("%4d", static_cast<int>(sizeof(value)));
         ImGui::NextColumn();
 
         std::string title{"##"};
         title.append(meta.name);
-
+        
         return title;
     }
 

@@ -32,7 +32,7 @@ pupene::PupPolicy EditorPupper::begin_impl(vec2f& value,
 void EditorPupper::layout_columns() {
     ImGui::SetColumnWidth(0, 140);
     ImGui::SetColumnWidth(1, 90);
-    ImGui::SetColumnWidth(2, 40);
+    ImGui::SetColumnWidth(2, 45);
 }
 
 void EditorPupper::open_window(const std::string& title) {
