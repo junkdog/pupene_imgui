@@ -6,89 +6,8 @@
 #include <memory>
 #include "puppers.h"
 #include "traits.h"
+#include "wrapper.h"
 
-
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wformat"
-
-template<typename, typename>
-struct input_adapter;
-
-struct bindable {
-    virtual ~bindable() = default;
-    virtual void update_proxy() = 0;
-    virtual void update_value() = 0;
-    virtual std::unique_ptr<bindable> copy() const = 0;
-
-    virtual void* ptr() = 0; // TODO: variant?
-};
-
-class wrapper {
-public:
-    wrapper(std::unique_ptr<bindable> bound) : self(std::move(bound)) {}
-    wrapper(const wrapper& w) : self(w.self->copy()) {}
-    wrapper(wrapper&&) noexcept = default;
-
-    template <typename Proxy, typename Source>
-    static std::unique_ptr<bindable> make(Source& s) {
-        return std::make_unique<input_adapter<Source, Proxy>>(s);
-    }
-
-    wrapper& operator=(const wrapper& w) {
-        *this = wrapper{w};
-        return *this;
-    }
-
-    wrapper& operator=(wrapper&& w) noexcept = default;
-
-    void* ptr() {
-        return self->ptr();
-    }
-
-    void update() {
-        self->update_value();
-    }
-
-private:
-
-    template<typename Source, typename Proxy>
-    struct input_adapter : bindable {
-        input_adapter(Source& t) : actual(t) {
-            update_proxy();
-        }
-
-        ~input_adapter() {
-            update_value();
-        }
-
-        void update_proxy() override {
-            proxy = static_cast<Proxy>(actual);
-        }
-
-        void update_value() override {
-            if (std::numeric_limits<Source>::min() > proxy) {
-                actual = std::numeric_limits<Source>::min();
-            } else if (std::numeric_limits<Source>::max() < proxy) {
-                actual = std::numeric_limits<Source>::max();
-            } else {
-                actual = static_cast<Source>(proxy);
-            }
-        }
-
-        std::unique_ptr<bindable> copy() const override {
-            return std::make_unique<input_adapter<Source, Proxy>>(*this);
-        }
-
-        void* ptr() override {
-            return &proxy;
-        }
-
-        Source& actual;
-        Proxy proxy;
-    };
-
-    std::unique_ptr<bindable> self;
-};
 
 class EditorPupper : public pupene::Pupper<EditorPupper> {
 public:
@@ -189,10 +108,13 @@ private:
         ImGui::Text("%s", meta.name.c_str());
         ImGui::NextColumn();
 
-        ImGui::Text("0x%08x", meta.name.c_str());
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wformat"
+        ImGui::Text("0x%08x", &value);
         ImGui::NextColumn();
+#pragma clang diagnostic pop
 
-        ImGui::Text("%d", sizeof(value));
+        ImGui::Text("%d", static_cast<int>(sizeof(value)));
         ImGui::NextColumn();
 
         std::string title{"##"};
@@ -213,4 +135,3 @@ pupene::PupPolicy EditorPupper::begin_impl(vec2f& value,
                                            const pupene::Meta& meta);
 
 
-#pragma clang diagnostic pop

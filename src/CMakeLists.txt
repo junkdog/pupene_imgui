@@ -29,6 +29,7 @@ add_executable(example
     EditorPupper.cpp
     EditorPupper.h
     puppers.h
+    wrapper.h
     traits.h)
 target_link_libraries(example PUBLIC ${link_libraries})
 
