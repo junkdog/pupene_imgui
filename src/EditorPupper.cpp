@@ -1,3 +1,4 @@
+#include <SDL2/SDL_keycode.h>
 #include "EditorPupper.h"
 
 using pupene::PupPolicy;
@@ -45,11 +46,33 @@ void EditorPupper::open_window(const std::string& title) {
         return;
     }
 
+    ImGui::Text("filter:");
+    ImGuiTextEditCallback on_edit = [](auto data) -> int {
+        auto& s = *static_cast<std::string*>(data->UserData);
+        s = data->Buf;
+
+        return 0;
+    };
+    ImGui::SameLine();
+    auto& io = ImGui::GetIO();
+    if (io.KeyCtrl and io.KeysDown[SDLK_f])
+        ImGui::SetKeyboardFocusHere();
+    ImGui::PushItemWidth(ImGui::GetContentRegionAvailWidth());
+    ImGui::InputText("##filter",
+                     &config.filter[0],
+                     config.filter.capacity(),
+                     ImGuiInputTextFlags_CharsNoBlank | ImGuiInputTextFlags_CallbackAlways | ImGuiInputTextFlags_AutoSelectAll,
+                     on_edit,
+                     &config.filter);
+
+    ImGui::PopItemWidth();
+    ImGui::NextColumn();
+
     ImGui::Columns(4, "title-with-no-end");
     ImGui::Separator();
     layout_columns();
 
-    static ImVec4 color = {.25f, .75f, .9f, 1.f};
+    ImVec4 color = color::header;
     ImGui::TextColored(color, "name"); ImGui::NextColumn();
     ImGui::TextColored(color, "addr"); ImGui::NextColumn();
     ImGui::TextColored(color, "size"); ImGui::NextColumn();
@@ -58,3 +81,12 @@ void EditorPupper::open_window(const std::string& title) {
 
     ImGui::Separator();
 }
+
+bool EditorPupper::is_filtered(const Meta& meta) {
+    return !config.filter.empty()
+        && meta.name.find(config.filter) == std::string::npos;
+}
+
+ImVec4 color::header = ImVec4{.25f, .75f, .9f, 1.f};
+ImVec4 color::begin = ImVec4{0.454f, 0.551f, 0.505f, 1.f};
+ImVec4 color::object = ImVec4{0.204f, 0.651f, 0.400f, 1.f};

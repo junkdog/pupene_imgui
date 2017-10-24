@@ -40,14 +40,6 @@ struct complex_thing {
     std::string hallo = "omg";
 };
 
-
-
-
-
-
-
-
-
 namespace pupene::fns {
     template<typename P>
     void pup(Pupper<P>& p, vec2f& v, const Meta& meta) {

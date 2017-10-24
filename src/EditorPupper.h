@@ -9,12 +9,27 @@
 #include "wrapper.h"
 
 
+
+namespace color {
+    extern ImVec4 header;
+    extern ImVec4 begin;
+    extern ImVec4 object;
+}
+
+
 class EditorPupper : public pupene::Pupper<EditorPupper> {
 public:
+    struct Config {
+        std::string filter;
+        std::string title;
+        bool request_focus_filter; // FIXME: render as checkbox
+        bool filter_show_survivor_parents;
+    };
+
     using Meta = pupene::Meta;
     using PupPolicy = pupene::PupPolicy;
 
-    explicit EditorPupper(const std::string& title) {
+    explicit EditorPupper(const std::string& title, Config& config) : config(config) {
         open_window(title);
     }
 
@@ -22,17 +37,24 @@ public:
 
     template <typename T>
     PupPolicy begin_impl(T& value, const Meta& meta) {
-        ImGui::PushID(&value);
+        if (is_filtered(meta))
+            return PupPolicy::pup_object;
 
+        ImGui::PushID(&value);
+        ImGui::PushStyleColor(ImGuiCol_Text, color::begin);
         prepare(value, meta);
         ImGui::NextColumn();
+        ImGui::PopStyleColor();
 
         depth++;
 
         return PupPolicy::pup_object;
     }
 
-    void end_impl() {
+    void end_impl(const Meta& meta) {
+        if (is_filtered(meta))
+            return;
+
         depth--;
         ImGui::PopID();
     }
@@ -41,7 +63,13 @@ public:
               typename = enable_if_decimal<T>>
     void pup_impl(T& value, const Meta& meta) {
         pup_to_widget<float>(value, meta, [](auto label, auto ptr) {
-            ImGui::DragFloat(label, ptr, 0, 100);
+            ImGui::DragFloat(
+                label,
+                ptr,
+                .01f,
+                std::numeric_limits<T>::min(),
+                std::numeric_limits<T>::max(),
+                "%.3f");
         });
     }
 
@@ -50,13 +78,40 @@ public:
               typename = enable_if_integer<T>>
     void pup_impl(T& value, const Meta& meta) {
         pup_to_widget<int>(value, meta, [](auto label, auto ptr) {
-            ImGui::DragInt(label, ptr, 0, 100);
+            constexpr int min = (sizeof(T) >= 4)
+                ? std::numeric_limits<int>::min()
+                : std::numeric_limits<T>::min();
+            constexpr int max = (sizeof(T) >= 4)
+                ? std::numeric_limits<int>::max()
+                : std::numeric_limits<T>::max();
+
+            ImGui::DragInt(label, ptr, 1.f, min, max);
         });
     }
 
-    void pup_impl(std::string& value, const Meta& meta) {
-        to_widget(value, meta, [&value](auto label) {
-            ImGui::InputText(label, &value[0], value.capacity());
+    void pup_impl(std::string& s, const Meta& meta) {
+        auto& color = ImGui::GetStyleColorVec4(ImGuiCol_Text);
+        to_widget(s, meta, color, [&s](auto label) {
+            // currently no clean way to to dynamically grow backing
+            // arrays without fiddling around with internals.
+            // refer to https://github.com/ocornut/imgui/issues/1008
+            static const int MAX_STRING_CHARS = 50;
+            if (s.capacity() < MAX_STRING_CHARS) {
+                s.reserve(MAX_STRING_CHARS);
+            }
+
+            ImGuiTextEditCallback on_edit = [](auto data) -> int {
+                auto& s = *static_cast<std::string*>(data->UserData);
+                s = data->Buf;
+                return 0;
+            };
+
+            ImGui::InputText(label,
+                             &s[0],
+                             s.capacity(),
+                             ImGuiInputTextFlags_CallbackAlways,
+                             on_edit,
+                             &s);
         });
     }
 
@@ -67,13 +122,22 @@ public:
 private:
     std::vector<wrapper> bindings;
     int depth = -1;
+    Config& config;
+
+    bool is_filtered(const Meta& meta);
 
     template <typename T, typename Fn>
     void to_widget(T& value,
                    const Meta& meta,
+                   const ImVec4& color,
                    Fn&& wpup) {
 
+        if (is_filtered(meta))
+            return;
+
+        ImGui::PushStyleColor(ImGuiCol_Text, color);
         std::string label = prepare(value, meta);
+        ImGui::PopStyleColor();
 
         ImGui::PushItemWidth(ImGui::GetContentRegionAvailWidth());
         wpup(label.c_str());
@@ -86,8 +150,10 @@ private:
                        const Meta& meta,
                        Fn&& wpup) {
 
+        auto& color = ImGui::GetStyleColorVec4(ImGuiCol_Text);
         to_widget(value,
                   meta,
+                  color,
                   [&b = bindings, &wpup, &value](auto label) {
                       b.emplace_back(wrapper::make<PtrType>(value));
                       wpup(label, static_cast<PtrType*>(b.back().ptr()));
@@ -99,10 +165,14 @@ private:
                           const Meta& meta,
                           Fn&& wpup) {
 
-        to_widget(value, meta, [&wpup, &value](auto label) {
+        if (is_filtered(meta))
+            return;
+
+        to_widget(value, meta, color::object, [&wpup, &value](auto label) {
             ImGui::PushID(&value);
             wpup(label);
         });
+
         depth++;
     }
 
