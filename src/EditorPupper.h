@@ -4,10 +4,9 @@
 #include <pupene/pupene.h>
 #include <imgui/imgui.h>
 #include <memory>
-#include "puppers.h"
 #include "traits.h"
 #include "wrapper.h"
-
+#include "EditorConfig.h"
 
 
 namespace color {
@@ -19,30 +18,21 @@ namespace color {
 
 class EditorPupper : public pupene::Pupper<EditorPupper> {
 public:
-    struct Config {
-        struct Filter {
-            std::string pattern;
-            bool show_parents;
-            bool request_focus; // FIXME: render as checkbox
-        };
-
-        std::string title;
-        Filter filter;
-    };
-
     using Meta = pupene::Meta;
     using PupPolicy = pupene::PupPolicy;
 
-    explicit EditorPupper(const std::string& title, Config& config) : config(config) {
-        open_window(title);
+    explicit EditorPupper(EditorConfig& config) : config(config) {
+        open_window();
     }
 
     ~EditorPupper() override = default;
 
     template <typename T>
     PupPolicy begin_impl(T& value, const Meta& meta) {
-        if (is_filtered(meta))
+        if (is_filtered(meta)) {
+            parents.push_back(meta);
             return PupPolicy::pup_object;
+        }
 
         ImGui::PushID(&value);
         ImGui::PushStyleColor(ImGuiCol_Text, color::begin);
@@ -56,11 +46,15 @@ public:
     }
 
     void end_impl(const Meta& meta) {
-        if (is_filtered(meta))
-            return;
-
-        depth--;
-        ImGui::PopID();
+        if (is_filtered(meta)) {
+            if (!parents.empty() && meta.name == parents.back().name) {
+                depth--;
+                parents.pop_back();
+            }
+        } else {
+            depth--;
+            ImGui::PopID();
+        }
     }
 
     template <typename T,
@@ -125,8 +119,9 @@ public:
 
 private:
     std::vector<wrapper> bindings;
+    std::vector<Meta> parents;
     int depth = -1;
-    Config& config;
+    EditorConfig& config;
 
     bool is_filtered(const Meta& meta);
 
@@ -139,6 +134,22 @@ private:
         if (is_filtered(meta))
             return;
 
+        int restore_depth = depth; // FIXME: must save with meta/parents
+        if (config.filter.show_parents && !parents.empty()) {
+            ImGui::PushStyleColor(ImGuiCol_Text, color::begin);
+            for (auto& parent : parents) {
+                write_label(parent);
+                ImGui::NextColumn();
+                ImGui::NextColumn();
+                ImGui::NextColumn();
+
+                depth++;
+            }
+            ImGui::PopStyleColor();
+
+            parents.clear();
+        }
+
         ImGui::PushStyleColor(ImGuiCol_Text, color);
         std::string label = prepare(value, meta);
         ImGui::PopStyleColor();
@@ -147,6 +158,8 @@ private:
         wpup(label.c_str());
         ImGui::PopItemWidth();
         ImGui::NextColumn();
+
+        depth = restore_depth;
     }
 
     template <typename PtrType, typename T, typename Fn>
@@ -180,15 +193,12 @@ private:
         depth++;
     }
 
-    void open_window(const std::string& title);
+    void open_window();
 
     template <typename T>
     std::string prepare(T& value, const Meta& meta) {
         // FIXME: indent not working with columns (i think)
-        auto indent = std::max(0, depth) * 2;
-        std::string s(indent, ' ');
-        ImGui::Text("%s%s", s.c_str(), meta.name.c_str());
-        ImGui::NextColumn();
+        write_label(meta);
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wformat"
@@ -205,6 +215,13 @@ private:
         return title;
     }
 
+    void write_label(const Meta& meta) const {
+        auto indent = std::max(0, depth) * 2;
+        std::__cxx11::string s(indent, ' ');
+        ImGui::Text("%s%s", s.c_str(), meta.name.c_str());
+        ImGui::NextColumn();
+    }
+
     void layout_columns();
 };
 
@@ -215,5 +232,4 @@ pupene::PupPolicy EditorPupper::begin_impl(Color& value,
 template <>
 pupene::PupPolicy EditorPupper::begin_impl(vec2f& value,
                                            const pupene::Meta& meta);
-
 

@@ -28,6 +28,7 @@ add_executable(example
     imgui_impl_sdl_gl3.h
     EditorPupper.cpp
     EditorPupper.h
+    EditorConfig.h
     puppers.h
     wrapper.h
     traits.h)

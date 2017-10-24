@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <pupene/pup.h>
 #include <imgui/imgui.h>
+#include "EditorConfig.h"
 
 using byte = unsigned char;
 
@@ -24,10 +25,6 @@ struct vec22fi {
     vec2f floats;
     vec2i ints;
 };
-
-
-
-
 
 
 struct complex_thing {
@@ -93,6 +90,23 @@ namespace pupene::fns {
             fpup(v.byte, {"byte"s});
             fpup(v.color, {"color"s});
             fpup(v.hallo, {"hallo"s});
+        });
+    }
+
+    template<typename P>
+    void pup(Pupper<P>& p, EditorConfig& v, const Meta& meta) {
+        pup_object(p, v, meta.name, [&v](auto&& fpup) {
+            fpup(v.title, {"title"s});
+            fpup(v.filter, {"filter"s});
+        });
+    }
+
+    template<typename P>
+    void pup(Pupper<P>& p, EditorConfig::Filter& v, const Meta& meta) {
+        pup_object(p, v, meta.name, [&v](auto&& fpup) {
+            fpup(v.pattern, {"pattern"s});
+            fpup(v.show_parents, {"show parents"s});
+            fpup(v.request_focus, {"request focus"s});
         });
     }
 }

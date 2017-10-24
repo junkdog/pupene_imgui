@@ -36,10 +36,10 @@ void EditorPupper::layout_columns() {
     ImGui::SetColumnWidth(2, 45);
 }
 
-void EditorPupper::open_window(const std::string& title) {
+void EditorPupper::open_window() {
     bool open = true;
-    std::string s{"Property editor: "};
-    s.append(title);
+    std::string s{"edit: "};
+    s.append(config.title);
 
     if (!ImGui::Begin(s.c_str(), &open)) {
         ImGui::End();
@@ -54,9 +54,10 @@ void EditorPupper::open_window(const std::string& title) {
         return 0;
     };
     ImGui::SameLine();
-    auto& io = ImGui::GetIO();
-    if (io.KeyCtrl and io.KeysDown[SDLK_f])
+
+    if (config.filter.request_focus)
         ImGui::SetKeyboardFocusHere();
+
     ImGui::PushItemWidth(ImGui::GetContentRegionAvailWidth());
     ImGui::InputText("##filter",
                      &config.filter.pattern[0],

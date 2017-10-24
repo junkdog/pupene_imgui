@@ -10,7 +10,12 @@
 #include "imgui_impl_sdl_gl3.h"
 #include "EditorPupper.h"
 
+void process_shortcuts(EditorConfig& config, bool is_key_down_event, int key);
+
 using std::literals::string_literals::operator""s;
+
+
+
 
 static SDL_DisplayMode create_display() {
     // Setup SDL
@@ -179,25 +184,25 @@ void cleanup(SDL_Window* window, SDL_GLContext gl) {
     SDL_Quit();
 }
 
-bool poll_events() {
+bool poll_events(std::function<void(bool, int)>& callback) {
     bool done = false;
 
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
-        ImGui_ImplSdlGL3_ProcessEvent(&event);
+        ImGui_ImplSdlGL3_ProcessEvent(&event, callback);
         if (event.type == SDL_QUIT)
             done = true;
     }
 
-    auto io = ImGui::GetIO();
-    static bool capture_text = false;
-    if (!capture_text && io.WantTextInput) {
-        capture_text = true;
-        SDL_StartTextInput();
-    } else if (capture_text && !io.WantTextInput) {
-        capture_text = false;
-        SDL_StopTextInput();
-    }
+//    auto io = ImGui::GetIO();
+//    static bool capture_text = false;
+//    if (!capture_text && io.WantTextInput) {
+//        capture_text = true;
+//        SDL_StartTextInput();
+//    } else if (capture_text && !io.WantTextInput) {
+//        capture_text = false;
+//        SDL_StopTextInput();
+//    }
 
     return done;
 }
@@ -216,10 +221,9 @@ namespace ui::widget {
 
     template <typename T>
     void object_editor(T& t,
-                       const std::string& title,
-                       EditorPupper::Config& config,
+                       EditorConfig& config,
                        bool debug = false) {
-        auto pupper = EditorPupper{title, config};
+        auto pupper = EditorPupper{config};
         do_pup(pupper, t, debug);
         pupper.flush();
     }
@@ -246,17 +250,31 @@ int main () {
 
     float h, s, v;
 
-    auto config = EditorPupper::Config{};
+    auto config = EditorConfig{"object"};
     config.filter.pattern.reserve(50);
+    auto config2 = EditorConfig{"object view"};
+    config2.filter.pattern.reserve(50);
 
-    while (!poll_events()) {
+    auto cconfig = EditorConfig{"config instance"};
+    cconfig.filter.pattern.reserve(50);
+
+//    std::function<void(bool,int)> key_callback = [&config](bool type_key_down, int key) {
+    std::function<void(bool, int)> key_callback = [&config](bool type_key_down, int key) {
+        process_shortcuts(config, type_key_down, key);
+    };
+
+    while (!poll_events(key_callback)) {
+//        update(config);
+
         // concluded by render_frame()
         ImGui_ImplSdlGL3_NewFrame(window);
 
         bool yes = true;
         ImGui::ShowTestWindow(&yes);
 
-        ui::widget::object_editor(ct, "phat", config);
+        ui::widget::object_editor(ct, config);
+        ui::widget::object_editor(ct, config2);
+        ui::widget::object_editor(config, cconfig);
 
         ImGui::Begin("palette shifter", nullptr);
         ImGui::PushItemWidth(ImGui::GetContentRegionAvailWidth());
@@ -284,4 +302,20 @@ int main () {
     cleanup(window, gl);
 
     return 0;
+}
+
+void process_shortcuts(EditorConfig& config,
+                       bool is_key_down_event,
+                       int key) {
+
+    if (!is_key_down_event)
+        return;
+
+    auto toggle = [](bool& flag) { flag = !flag; };
+
+    auto& io = ImGui::GetIO();
+    if (io.KeyCtrl && SDLK_f == key)
+        toggle(config.filter.request_focus);
+    if (io.KeyCtrl && SDLK_l == key)
+        toggle(config.filter.show_parents);
 }

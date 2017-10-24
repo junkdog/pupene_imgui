@@ -152,7 +152,8 @@ static void key_down(const SDL_Keysym& key) {
         ImGui::GetIO().AddInputCharacter(c);
 }
 
-bool ImGui_ImplSdlGL3_ProcessEvent(SDL_Event* event)
+bool ImGui_ImplSdlGL3_ProcessEvent(SDL_Event* event,
+                                   key_callback& callback)
 {
     static std::set<int> all_types{};
     if (all_types.find(event->type) == all_types.end()) {
@@ -192,6 +193,9 @@ bool ImGui_ImplSdlGL3_ProcessEvent(SDL_Event* event)
             io.KeyCtrl = ((SDL_GetModState() & KMOD_CTRL) != 0);
             io.KeyAlt = ((SDL_GetModState() & KMOD_ALT) != 0);
             io.KeySuper = ((SDL_GetModState() & KMOD_GUI) != 0);
+
+            callback(event->type == SDL_KEYDOWN, key);
+
             return true;
         }
         default:
