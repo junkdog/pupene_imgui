@@ -20,10 +20,14 @@ namespace color {
 class EditorPupper : public pupene::Pupper<EditorPupper> {
 public:
     struct Config {
-        std::string filter;
+        struct Filter {
+            std::string pattern;
+            bool show_parents;
+            bool request_focus; // FIXME: render as checkbox
+        };
+
         std::string title;
-        bool request_focus_filter; // FIXME: render as checkbox
-        bool filter_show_survivor_parents;
+        Filter filter;
     };
 
     using Meta = pupene::Meta;

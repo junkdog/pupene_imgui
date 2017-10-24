@@ -59,8 +59,8 @@ void EditorPupper::open_window(const std::string& title) {
         ImGui::SetKeyboardFocusHere();
     ImGui::PushItemWidth(ImGui::GetContentRegionAvailWidth());
     ImGui::InputText("##filter",
-                     &config.filter[0],
-                     config.filter.capacity(),
+                     &config.filter.pattern[0],
+                     config.filter.pattern.capacity(),
                      ImGuiInputTextFlags_CharsNoBlank | ImGuiInputTextFlags_CallbackAlways | ImGuiInputTextFlags_AutoSelectAll,
                      on_edit,
                      &config.filter);
@@ -83,8 +83,8 @@ void EditorPupper::open_window(const std::string& title) {
 }
 
 bool EditorPupper::is_filtered(const Meta& meta) {
-    return !config.filter.empty()
-        && meta.name.find(config.filter) == std::string::npos;
+    return !config.filter.pattern.empty()
+        && meta.name.find(config.filter.pattern) == std::string::npos;
 }
 
 ImVec4 color::header = ImVec4{.25f, .75f, .9f, 1.f};

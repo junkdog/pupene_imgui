@@ -247,7 +247,7 @@ int main () {
     float h, s, v;
 
     auto config = EditorPupper::Config{};
-    config.filter.reserve(50);
+    config.filter.pattern.reserve(50);
 
     while (!poll_events()) {
         // concluded by render_frame()
