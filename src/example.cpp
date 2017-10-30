@@ -17,8 +17,7 @@ using std::literals::string_literals::operator""s;
 
 static SDL_DisplayMode create_display() {
     // Setup SDL
-    if (SDL_Init(SDL_INIT_VIDEO|SDL_INIT_EVENTS|SDL_INIT_TIMER) != 0)
-    {
+    if (SDL_Init(SDL_INIT_VIDEO|SDL_INIT_EVENTS|SDL_INIT_TIMER) != 0) {
         printf("Error: %s\n", SDL_GetError());
         throw std::runtime_error("sdl error:"s + SDL_GetError());
     }
@@ -309,13 +308,15 @@ void process_shortcuts(EditorConfig& config,
     if (!is_key_down_event)
         return;
 
-    auto toggle = [](bool& flag) { flag = !flag; };
-
     auto& io = ImGui::GetIO();
-    if (io.KeyCtrl && SDLK_f == key)
+    if (!io.KeyCtrl)
+        return;
+
+    auto toggle = [](bool& flag) { flag = !flag; };
+    if (SDLK_f == key)
         toggle(config.filter.request_focus);
-    if (io.KeyCtrl && SDLK_l == key)
+    if (SDLK_l == key)
         toggle(config.filter.show_parents);
-    if (io.KeyCtrl && SDLK_d == key)
+    if (SDLK_d == key)
         config.filter.pattern = "";
 }

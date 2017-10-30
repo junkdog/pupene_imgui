@@ -43,7 +43,8 @@ void EditorPupper::open_window() {
     s.append("###");
     s.append(std::to_string(reinterpret_cast<uint64_t>(&config)));
 
-    if (!ImGui::Begin(s.c_str(), &open, ImVec2{450.f, 350.f})) {
+    const auto flags = ImGuiWindowFlags_NoCollapse;
+    if (!ImGui::Begin(s.c_str(), &open, ImVec2{450.f, 350.f}, -1.0f, flags)) {
         ImGui::End();
         return;
     }
