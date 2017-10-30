@@ -40,8 +40,10 @@ void EditorPupper::open_window() {
     bool open = true;
     std::string s{"edit: "};
     s.append(config.title);
+    s.append("###");
+    s.append(std::to_string(reinterpret_cast<uint64_t>(&config)));
 
-    if (!ImGui::Begin(s.c_str(), &open)) {
+    if (!ImGui::Begin(s.c_str(), &open, ImVec2{450.f, 350.f})) {
         ImGui::End();
         return;
     }
@@ -55,11 +57,13 @@ void EditorPupper::open_window() {
     };
     ImGui::SameLine();
 
-    if (config.filter.request_focus)
+    if (config.filter.request_focus) {
         ImGui::SetKeyboardFocusHere();
+        config.filter.request_focus = false;
+    }
 
     ImGui::PushItemWidth(ImGui::GetContentRegionAvailWidth());
-    ImGui::InputText("##filter",
+    ImGui::InputText("###filter",
                      &config.filter.pattern[0],
                      config.filter.pattern.capacity(),
                      ImGuiInputTextFlags_CharsNoBlank | ImGuiInputTextFlags_CallbackAlways | ImGuiInputTextFlags_AutoSelectAll,

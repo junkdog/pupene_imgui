@@ -87,6 +87,13 @@ public:
         });
     }
 
+    void pup_impl(bool& b, const Meta& meta) {
+        auto& color = ImGui::GetStyleColorVec4(ImGuiCol_Text);
+        to_widget(b, meta, color, [&b](auto label) {
+            ImGui::Checkbox(label, &b);
+        });
+    }
+
     void pup_impl(std::string& s, const Meta& meta) {
         auto& color = ImGui::GetStyleColorVec4(ImGuiCol_Text);
         to_widget(s, meta, color, [&s](auto label) {
@@ -209,9 +216,10 @@ private:
         ImGui::Text("%4d", static_cast<int>(sizeof(value)));
         ImGui::NextColumn();
 
-        std::string title{"##"};
+        std::string title{"###"};
         title.append(meta.name);
-        
+        title.append(std::to_string(reinterpret_cast<uint_fast64_t>(&value)));
+
         return title;
     }
 

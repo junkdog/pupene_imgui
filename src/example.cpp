@@ -15,8 +15,6 @@ void process_shortcuts(EditorConfig& config, bool is_key_down_event, int key);
 using std::literals::string_literals::operator""s;
 
 
-
-
 static SDL_DisplayMode create_display() {
     // Setup SDL
     if (SDL_Init(SDL_INIT_VIDEO|SDL_INIT_EVENTS|SDL_INIT_TIMER) != 0)
@@ -318,4 +316,6 @@ void process_shortcuts(EditorConfig& config,
         toggle(config.filter.request_focus);
     if (io.KeyCtrl && SDLK_l == key)
         toggle(config.filter.show_parents);
+    if (io.KeyCtrl && SDLK_d == key)
+        config.filter.pattern = "";
 }
