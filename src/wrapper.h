@@ -82,44 +82,6 @@ private:
         Proxy proxy;
     };
 
-//    template<typename Source, typename Proxy>
-//    struct string_adapter : bindable {
-//        explicit string_adapter(std::string& s) : actual(s) {
-//            update_proxy();
-//        }
-//
-//        ~string_adapter() final {
-//            update_value();
-//        }
-//
-//        void update_proxy() override {
-////            proxy = static_cast<Proxy>(actual);
-//        }
-//
-//        void update_value() override {
-//            constexpr auto min = std::numeric_limits<Source>::min();
-//            constexpr auto max = std::numeric_limits<Source>::max();
-//
-//            if (min > proxy) {
-//                actual = min;
-//            } else if (max < proxy) {
-//                actual = max;
-//            } else {
-//                actual = static_cast<Source>(proxy);
-//            }
-//        }
-//
-//        std::unique_ptr<bindable> copy() const override {
-//            return std::make_unique<input_adapter<Source, Proxy>>(*this);
-//        }
-//
-//        void* ptr() override {
-//            return &actual[0];
-//        }
-//
-//        std::string& actual;
-//    };
-
     std::unique_ptr<bindable> self;
 };
 
