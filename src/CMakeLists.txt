@@ -24,6 +24,7 @@ list(APPEND link_libraries glm)
 #    main.cpp
 add_executable(example
     example.cpp
+    pupdefs.h
     imgui_impl_sdl_gl3.cpp
     imgui_impl_sdl_gl3.h
     EditorPupper.cpp
@@ -40,4 +41,10 @@ install(
 )
 add_custom_target(
     valgrind
-    COMMAND valgrind --track-origins=yes --tool=memcheck --leak-check=full --num-callers=40 ./bin/example)
+    COMMAND valgrind
+        --track-origins=yes
+        --tool=memcheck
+        --leak-check=full
+        --num-callers=40 ./bin/example
+    DEPENDS ./bin/example
+)

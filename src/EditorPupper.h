@@ -4,6 +4,7 @@
 #include <pupene/pupene.h>
 #include <imgui/imgui.h>
 #include <memory>
+#include <vector>
 #include "traits.h"
 #include "wrapper.h"
 #include "EditorConfig.h"
@@ -28,7 +29,7 @@ public:
     ~EditorPupper() override = default;
 
     template <typename T>
-    PupPolicy begin_impl(T& value, const Meta& meta) {
+    PupPolicy begin(T& value, const Meta& meta) {
         if (is_filtered(meta)) {
             parents.push_back(meta);
             return PupPolicy::pup_object;
@@ -45,7 +46,7 @@ public:
         return PupPolicy::pup_object;
     }
 
-    void end_impl(const Meta& meta) {
+    void end(const Meta& meta) {
         if (is_filtered(meta)) {
             if (!parents.empty() && meta.name == parents.back().name) {
                 depth--;
@@ -59,7 +60,7 @@ public:
 
     template <typename T,
               typename = enable_if_decimal<T>>
-    void pup_impl(T& value, const Meta& meta) {
+    void pup(T& value, const Meta& meta) {
         pup_to_widget<float>(value, meta, [](auto label, auto ptr) {
             ImGui::DragFloat(
                 label,
@@ -74,7 +75,7 @@ public:
     template <typename T,
               typename = void,
               typename = enable_if_integer<T>>
-    void pup_impl(T& value, const Meta& meta) {
+    void pup(T& value, const Meta& meta) {
         pup_to_widget<int>(value, meta, [](auto label, auto ptr) {
             constexpr int min = (sizeof(T) >= 4)
                 ? std::numeric_limits<int>::min()
@@ -87,14 +88,14 @@ public:
         });
     }
 
-    void pup_impl(bool& b, const Meta& meta) {
+    void pup(bool& b, const Meta& meta) {
         auto& color = ImGui::GetStyleColorVec4(ImGuiCol_Text);
         to_widget(b, meta, color, [&b](auto label) {
             ImGui::Checkbox(label, &b);
         });
     }
 
-    void pup_impl(std::string& s, const Meta& meta) {
+    void pup(std::string& s, const Meta& meta) {
         auto& color = ImGui::GetStyleColorVec4(ImGuiCol_Text);
         to_widget(s, meta, color, [&s](auto label) {
             // currently no clean way to to dynamically grow backing
@@ -225,8 +226,8 @@ private:
 
     void write_label(const Meta& meta) const {
         auto indent = std::max(0, depth) * 2;
-        std::__cxx11::string s(indent, ' ');
-        ImGui::Text("%s%s", s.c_str(), meta.name.c_str());
+        std::string s(indent, ' ');
+        ImGui::Text("%s%s", s.c_str(), meta.name);
         ImGui::NextColumn();
     }
 
@@ -234,10 +235,10 @@ private:
 };
 
 template <>
-pupene::PupPolicy EditorPupper::begin_impl(Color& value,
-                                           const pupene::Meta& meta);
+pupene::PupPolicy EditorPupper::begin(Color& value,
+                                      const pupene::Meta& meta);
 
 template <>
-pupene::PupPolicy EditorPupper::begin_impl(vec2f& value,
-                                           const pupene::Meta& meta);
+pupene::PupPolicy EditorPupper::begin(vec2f& value,
+                                      const pupene::Meta& meta);
 

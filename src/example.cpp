@@ -136,29 +136,29 @@ static void init_imgui(SDL_Window* window) {
 
     update_styling(0.12f, 0.f, 0.f);
 
-    const std::array<ImVec4, 5> greens = {
-        ImVec4{0.643f, 0.953f, 0.282f, 1.f},
-        ImVec4{0.565f, 0.827f, 0.259f, 1.f},
-        ImVec4{0.408f, 0.596f, 0.192f, 1.f},
-        ImVec4{0.259f, 0.373f, 0.125f, 1.f},
-        ImVec4{0.102f, 0.145f, 0.510f, 1.f}
-    };
+    const std::array<ImVec4, 5> greens = {{
+        {0.643f, 0.953f, 0.282f, 1.f},
+        {0.565f, 0.827f, 0.259f, 1.f},
+        {0.408f, 0.596f, 0.192f, 1.f},
+        {0.259f, 0.373f, 0.125f, 1.f},
+        {0.102f, 0.145f, 0.510f, 1.f}
+    }};
 
-    const std::array<ImVec4, 5> yellows = {
-        ImVec4{0.906f, 0.988f, 0.294f, 1.f},
-        ImVec4{0.820f, 0.890f, 0.278f, 1.f},
-        ImVec4{0.592f, 0.643f, 0.208f, 1.f},
-        ImVec4{0.369f, 0.400f, 0.137f, 1.f},
-        ImVec4{0.145f, 0.157f, 0.550f, 1.f}
-    };
+    const std::array<ImVec4, 5> yellows = {{
+        {0.906f, 0.988f, 0.294f, 1.f},
+        {0.820f, 0.890f, 0.278f, 1.f},
+        {0.592f, 0.643f, 0.208f, 1.f},
+        {0.369f, 0.400f, 0.137f, 1.f},
+        {0.145f, 0.157f, 0.550f, 1.f}
+    }};
 
-    const std::array<ImVec4, 5> cyan = {
-        ImVec4{0.255f, 0.859f, 0.518f, 1.f},
-        ImVec4{0.204f, 0.651f, 0.400f, 1.f},
-        ImVec4{0.153f, 0.471f, 0.290f, 1.f},
-        ImVec4{0.980f, 0.291f, 0.180f, 1.f},
-        ImVec4{0.390f, 0.114f, 0.710f, 1.f}
-    };
+    const std::array<ImVec4, 5> cyan = {{
+        {0.255f, 0.859f, 0.518f, 1.f},
+        {0.204f, 0.651f, 0.400f, 1.f},
+        {0.153f, 0.471f, 0.290f, 1.f},
+        {0.980f, 0.291f, 0.180f, 1.f},
+        {0.390f, 0.114f, 0.710f, 1.f}
+    }};
 
 
 }
@@ -273,22 +273,22 @@ int main () {
         ui::widget::object_editor(ct, config2);
         ui::widget::object_editor(config, cconfig);
 
-        ImGui::Begin("palette shifter", nullptr);
-        ImGui::PushItemWidth(ImGui::GetContentRegionAvailWidth());
-        ImGui::SliderFloat("H", &h,  0.f, 1.f);
-        ImGui::SliderFloat("S", &s, -1.f, 1.f);
-        ImGui::SliderFloat("V", &v, -1.f, 1.f);
-        ImGui::PopItemWidth();
-        ImGui::End();
+//        ImGui::Begin("palette shifter", nullptr);
+//        ImGui::PushItemWidth(ImGui::GetContentRegionAvailWidth());
+//        ImGui::SliderFloat("H", &h,  0.f, 1.f);
+//        ImGui::SliderFloat("S", &s, -1.f, 1.f);
+//        ImGui::SliderFloat("V", &v, -1.f, 1.f);
+//        ImGui::PopItemWidth();
+//        ImGui::End();
 
-        ImGui::Begin("row colors", nullptr);
-        const auto flags = ImGuiColorEditFlags_Float
-                           | ImGuiColorEditFlags_RGB
-                           | ImGuiColorEditFlags_HSV;
-        ImGui::ColorEdit4("header", &color::header.x, flags);
-        ImGui::ColorEdit4("begin", &color::begin.x, flags);
-        ImGui::ColorEdit4("object", &color::object.x, flags);
-        ImGui::End();
+//        ImGui::Begin("row colors", nullptr);
+//        const auto flags = ImGuiColorEditFlags_Float
+//                           | ImGuiColorEditFlags_RGB
+//                           | ImGuiColorEditFlags_HSV;
+//        ImGui::ColorEdit4("header", &color::header.x, flags);
+//        ImGui::ColorEdit4("begin", &color::begin.x, flags);
+//        ImGui::ColorEdit4("object", &color::object.x, flags);
+//        ImGui::End();
 
 
         render_frame(window);

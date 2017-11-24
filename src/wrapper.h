@@ -18,7 +18,7 @@ public:
         virtual void* ptr() = 0; // TODO: variant?
     };
 
-    wrapper(std::unique_ptr<bindable> bound) : self(move(bound)) {}
+    wrapper(std::unique_ptr<bindable> bound) : self(std::move(bound)) {}
     wrapper(const wrapper& w) : self(w.self->copy()) {}
     wrapper(wrapper&&) noexcept = default;
 

@@ -5,8 +5,8 @@ using pupene::PupPolicy;
 using pupene::Meta;
 
 template<>
-PupPolicy EditorPupper::begin_impl(Color& value,
-                                   const Meta& meta) {
+PupPolicy EditorPupper::begin(Color& value,
+                              const Meta& meta) {
 
     object_to_widget(value, meta, [&value](auto label) {
         int flags = ImGuiColorEditFlags_RGB
@@ -20,8 +20,8 @@ PupPolicy EditorPupper::begin_impl(Color& value,
 }
 
 template<>
-pupene::PupPolicy EditorPupper::begin_impl(vec2f& value,
-                                           const pupene::Meta& meta) {
+pupene::PupPolicy EditorPupper::begin(vec2f& value,
+                                      const pupene::Meta& meta) {
 
     object_to_widget(value.x, meta, [&value](auto label) {
         ImGui::InputFloat2(label, &value.x);
@@ -37,14 +37,18 @@ void EditorPupper::layout_columns() {
 }
 
 void EditorPupper::open_window() {
-    bool open = true;
-    std::string s{"edit: "};
-    s.append(config.title);
-    s.append("###");
-    s.append(std::to_string(reinterpret_cast<uint64_t>(&config)));
+//    std::string s{"edit: "};
+    std::string title = "edit: "
+        + config.title
+        + "###"
+        + std::to_string(reinterpret_cast<uint64_t>(&config));
+
+//    s.append("###");
+//    s.append(std::to_string(reinterpret_cast<uint64_t>(&config)));
 
     const auto flags = ImGuiWindowFlags_NoCollapse;
-    if (!ImGui::Begin(s.c_str(), &open, ImVec2{450.f, 350.f}, -1.0f, flags)) {
+//    if (!ImGui::Begin(s.c_str(), &open, ImVec2{450.f, 350.f}, -1.0f, flags)) {
+    if (!ImGui::Begin(title.c_str(), nullptr, ImVec2{450.f, 350.f}, -1.0f, flags)) {
         ImGui::End();
         return;
     }
@@ -74,7 +78,7 @@ void EditorPupper::open_window() {
     ImGui::PopItemWidth();
     ImGui::NextColumn();
 
-    ImGui::Columns(4, "title-with-no-end");
+    ImGui::Columns(4, "where-no-title-has-gone-before");
     ImGui::Separator();
     layout_columns();
 
@@ -89,8 +93,9 @@ void EditorPupper::open_window() {
 }
 
 bool EditorPupper::is_filtered(const Meta& meta) {
+    std::string name = meta.name;
     return !config.filter.pattern.empty()
-        && meta.name.find(config.filter.pattern) == std::string::npos;
+        && name.find(config.filter.pattern) == std::string::npos;
 }
 
 ImVec4 color::header = ImVec4{.25f, .75f, .9f, 1.f};

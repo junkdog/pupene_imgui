@@ -41,72 +41,72 @@ namespace pupene::fns {
     template<typename P>
     void pup(Pupper<P>& p, vec2f& v, const Meta& meta) {
         pup_object(p, v, meta, [&v](auto&& fpup) {
-            fpup(v.x, "x"s);
-            fpup(v.y, "y"s);
+            fpup(v.x, "x");
+            fpup(v.y, "y");
         });
     }
 
     template<typename P>
     void pup(Pupper<P>& p, vec2i& v, const Meta& meta) {
         pup_object(p, v, meta, [&v](auto&& fpup) {
-            fpup(v.x, "x"s);
-            fpup(v.y, "y"s);
+            fpup(v.x, "x");
+            fpup(v.y, "y");
         });
     }
 
     template<typename P>
     void pup(Pupper<P>& p, vec22fi& v, const Meta& meta) {
         pup_object(p, v, meta, [&v](auto&& fpup) {
-            fpup(v.floats, "floats"s);
-            fpup(v.ints, "ints"s);
+            fpup(v.floats, "floats");
+            fpup(v.ints, "ints");
         });
     }
 
     template<typename P>
     void pup(Pupper<P>& p, ImVec2 v, const Meta& meta) {
         pup_object(p, v, meta, [&v](auto&& fpup) {
-            fpup(v.x, "x"s);
-            fpup(v.y, "y"s);
+            fpup(v.x, "x");
+            fpup(v.y, "y");
         });
     }
 
     template<typename P>
     void pup(Pupper<P>& p, Color& v, const Meta& meta) {
         pup_object(p, v, meta, [&v](auto&& fpup) {
-            fpup(v.r, "r"s);
-            fpup(v.g, "g"s);
-            fpup(v.b, "b"s);
-            fpup(v.a, "a"s);
+            fpup(v.r, "r");
+            fpup(v.g, "g");
+            fpup(v.b, "b");
+            fpup(v.a, "a");
         });
     }
 
     template<typename P>
     void pup(Pupper<P>& p, complex_thing& v, const Meta& meta) {
         pup_object(p, v, meta, [&v](auto&& fpup) {
-            fpup(v.v22fi, "v22fi"s);
-            fpup(v.xy, "xy"s);
-            fpup(v.decimal, "decimal"s);
-            fpup(v.integer, "integer"s);
-            fpup(v.byte, "byte"s);
-            fpup(v.color, "color"s);
-            fpup(v.hallo, "hallo"s);
+            fpup(v.v22fi, "v22fi");
+            fpup(v.xy, "xy");
+            fpup(v.decimal, "decimal");
+            fpup(v.integer, "integer");
+            fpup(v.byte, "byte");
+            fpup(v.color, "color");
+            fpup(v.hallo, "hallo");
         });
     }
 
     template<typename P>
     void pup(Pupper<P>& p, EditorConfig& v, const Meta& meta) {
         pup_object(p, v, meta, [&v](auto&& fpup) {
-            fpup(v.title, "title"s);
-            fpup(v.filter, "filter"s);
+            fpup(v.title, "title");
+            fpup(v.filter, "filter");
         });
     }
 
     template<typename P>
     void pup(Pupper<P>& p, EditorConfig::Filter& v, const Meta& meta) {
         pup_object(p, v, meta, [&v](auto&& fpup) {
-            fpup(v.pattern, "pattern"s);
-            fpup(v.show_parents, "show_parents"s);
-            fpup(v.request_focus, "request_focus"s);
+            fpup(v.pattern, "pattern");
+            fpup(v.show_parents, "show_parents");
+            fpup(v.request_focus, "request_focus");
         });
     }
 }

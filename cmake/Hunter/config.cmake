@@ -2,7 +2,7 @@ hunter_config(
     pupene
     GIT_SUBMODULE "submodules/pupene"
     CMAKE_ARGS
-      PUPENE_WITH_JSON=false PUPENE_BUILD_TESTS=false
+      PUPENE_WITH_JSON=true
 )
 
 hunter_config(
