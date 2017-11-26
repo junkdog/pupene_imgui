@@ -1,7 +1,3 @@
-
-#set(link_libraries "")
-
-#    main.cpp
 add_executable(example
     example.cpp
     imgui_impl_sdl_gl3.cpp
@@ -14,17 +10,11 @@ add_executable(example
     traits.h)
 
 target_link_libraries(example PUBLIC ${CONAN_TARGETS})
-#    ${CONAN_LIBS}
-#    CONAN_PKG::pupene
-#    CONAN_PKG::SDL2
-#    CONAN_PKG::imgui
-#    CONAN_PKG::glm
-#    CONAN_PKG::glew)
 
 install(
     TARGETS example
-    RUNTIME DESTINATION bin
-)
+    RUNTIME DESTINATION bin)
+
 add_custom_target(
     valgrind
     COMMAND valgrind
@@ -32,5 +22,4 @@ add_custom_target(
         --tool=memcheck
         --leak-check=full
         --num-callers=40 ./bin/example
-    DEPENDS example
-)
+    DEPENDS example)

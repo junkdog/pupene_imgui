@@ -43,8 +43,7 @@ add_compile_options(
     -Widiomatic-parentheses
     -Wimplicit-fallthrough
     -Winconsistent-missing-override
-    -fno-omit-frame-pointer
-)
+    -fno-omit-frame-pointer)
 
 ### build it
 add_subdirectory(src)
