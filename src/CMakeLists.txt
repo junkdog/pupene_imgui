@@ -5,7 +5,7 @@ add_executable(example
     EditorPupper.cpp
     EditorPupper.h
     EditorConfig.h
-    puppers.h
+    pup-fns.h
     wrapper.h
     traits.h)
 

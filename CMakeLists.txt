@@ -1,7 +1,7 @@
 ### 3.8.0 for smoother c++17
 cmake_minimum_required(VERSION 3.8.0)
 
-project(pupene_example VERSION 0.2.0)
+project(pupene_imgui VERSION 0.2.0)
 
 ### conan configuration
 if(NOT EXISTS "${CMAKE_BINARY_DIR}/conan.cmake")

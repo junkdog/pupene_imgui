@@ -2,7 +2,7 @@
 #include <array>
 #include <algorithm>
 #include <fstream>
-#include "puppers.h"
+#include "pup-fns.h"
 #include <pupene/util.h>
 #include <SDL2/SDL_video.h>
 #include <SDL2/SDL.h>

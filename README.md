@@ -1,13 +1,11 @@
-## 
+## pupene_imgui
 
 A small demo exploring automatically building editor widgets for
 structs. Objects are introspected using [pupene][pupene], while
 [imgui][imgui] provides the underlying UI.
 
- [pupene]: https://github.com/ocornut/imgui
- [imgui]:  https://github.com/ocornut/imgui
 
-Code:
+A struct:
 
 ```cpp
 struct complex_thing {
@@ -21,21 +19,62 @@ struct complex_thing {
 };
 ```
 
-UI:
+... and the UI:
 
 ![pupene_imgui demo](pupene_imgui.gif?raw=true "UI")
 
 
 
-### A quick breakdown
+### A quick intro
 
-`pup()` functions work with all puppers. As such, for any type
-for which a UI can be constructed, binary and json serialization 
-is available too.  
+[pupene][pupene] requires that a `pup()` function is provided for
+each serializable type. These functions work with all puppers. As
+such, for any type for which a UI can be constructed, binary and json
+serialization is available too.
+
+Simplified usage:
+
+```cpp
+    // object to edit
+    auto ct = complex_thing{};
+
+    // the config object holds state for the current editor
+    auto config = EditorConfig{"object"};
+    config.filter.pattern.reserve(50); // rough edges
+
+    while (!poll_events(key_callback)) {
+        render_frame(window, [&ct, &config]() {
+            
+            // called each frame
+            ui::widget::object_editor(ct, config);
+        });
+    }
+``` 
+
+[pup-fns.h][pups] contains all necessary `pup()` functions and types.
+
 
 ### Project setup
 
+This has only been tested on Kubuntu 17.10, using clang-5.0 and
+gcc 7.2. It should/might work elsewhere too.
+
+**Requirements:**
+- Recent compiler with C++17 support
+- CMake 3.8+
+- python and [conan](https://conan.io/) (`pip install conan`)
+
+Add conan remote for imgui and pupene dependencies:  
+
+```bash
+conan remote add junkdog https://api.bintray.com/conan/junkdog/conan
+```
+
+
 #### Configure
+
+This step also builds the dependencies and installs them into the
+local conan cache.
 
 ```bash
 cmake -H. -B_builds \
@@ -59,3 +98,7 @@ the default imgui font will be used.
 cd _install/bin
 ./example
 ```
+
+ [pupene]: https://github.com/ocornut/imgui
+ [imgui]:  https://github.com/ocornut/imgui
+ [pups]:   https://github.com/junkdog/pupene_imgui/blob/master/src/pup-fns.h

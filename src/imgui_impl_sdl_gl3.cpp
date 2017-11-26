@@ -20,7 +20,7 @@
 #include <vector>
 
 // Data
-static double       g_Time = 0.0f;
+static double       g_Time = 0.0;
 static bool         g_MousePressed[3] = { false, false, false };
 static float        g_MouseWheel = 0.0f;
 static GLuint       g_FontTexture = 0;
