@@ -62,9 +62,9 @@ gcc 7.2. It should/might work elsewhere too.
 **Requirements:**
 - Recent compiler with C++17 support
 - CMake 3.8+
-- python and [conan](https://conan.io/) (`pip install conan`)
+- Python and [conan](https://conan.io/) (`pip install conan`)
 
-Add conan remote for imgui and pupene dependencies:  
+Add [this conan remote][conan-jd] for imgui and pupene dependencies:  
 
 ```bash
 conan remote add junkdog https://api.bintray.com/conan/junkdog/conan
@@ -99,6 +99,7 @@ cd _install/bin
 ./example
 ```
 
- [pupene]: https://github.com/ocornut/imgui
- [imgui]:  https://github.com/ocornut/imgui
- [pups]:   https://github.com/junkdog/pupene_imgui/blob/master/src/pup-fns.h
+ [conan-jd]: https://bintray.com/junkdog/conan
+ [pupene]:   https://github.com/junkdog/pupene
+ [imgui]:    https://github.com/ocornut/imgui
+ [pups]:     https://github.com/junkdog/pupene_imgui/blob/master/src/pup-fns.h
