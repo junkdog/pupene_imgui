@@ -1,0 +1,13 @@
+[requires]
+# 2.0.5 has problems linking on certain distros
+SDL2/2.0.4@lasote/stable
+glew/2.0.0@coding3d/stable
+glm/0.9.8.5@g-truc/stable
+pupene/0.1.4@demo/testing
+imgui/1.52@junkdog/stable
+
+[generators]
+cmake
+
+[options]
+SDL2:shared=True

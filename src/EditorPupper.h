@@ -1,7 +1,7 @@
 #pragma once
 
 #include <algorithm>
-#include <pupene/pupene.h>
+#include <pupene/pupper.h>
 #include <imgui/imgui.h>
 #include <memory>
 #include <vector>

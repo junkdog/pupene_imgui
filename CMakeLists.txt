@@ -1,15 +1,21 @@
 ### 3.8.0 for smoother c++17
 cmake_minimum_required(VERSION 3.8.0)
 
-### hunter init
-include("cmake/HunterGate.cmake")
-HunterGate(
-    URL "https://github.com/ruslo/hunter/archive/v0.19.99.tar.gz"
-    SHA1 "55ca271e9276b9973176e3f5a8c0d0dc25e46a53"
-    LOCAL # use cmake/hunter/config.cmake
-)
+project(pupene_example VERSION 0.2.0)
 
-project(pupene_example VERSION 0.1.1)
+### conan configuration
+if(NOT EXISTS "${CMAKE_BINARY_DIR}/conan.cmake")
+    set(conan_download_url "junkdog/cmake-conan")
+    message(STATUS "Downloading conan.cmake from https://github.com/${conan_download_url}")
+    file(DOWNLOAD "https://raw.githubusercontent.com/${conan_download_url}/master/conan.cmake"
+        "${CMAKE_BINARY_DIR}/conan.cmake")
+endif()
+
+include(${CMAKE_BINARY_DIR}/conan.cmake)
+conan_cmake_run(
+    CONANFILE conanfile.txt
+    BASIC_SETUP CMAKE_TARGETS
+    BUILD missing)
 
 ### compiler settings
 set(CMAKE_CXX_STANDARD 17)

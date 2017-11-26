@@ -3,12 +3,14 @@
 #include <algorithm>
 #include <fstream>
 #include "puppers.h"
-#include <pupene/pupene.h>
+#include <pupene/util.h>
 #include <SDL2/SDL_video.h>
 #include <SDL2/SDL.h>
 #include <GL/glew.h>
+#include <imgui/imgui.h>
 #include "imgui_impl_sdl_gl3.h"
 #include "EditorPupper.h"
+
 
 void process_shortcuts(EditorConfig& config, bool is_key_down_event, int key);
 

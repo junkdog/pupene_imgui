@@ -1,6 +1,5 @@
 #pragma once
 
-#include <pupene/pupene.h>
 #include <limits>
 #include <memory>
 #include "puppers.h"
