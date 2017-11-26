@@ -37,17 +37,13 @@ void EditorPupper::layout_columns() {
 }
 
 void EditorPupper::open_window() {
-//    std::string s{"edit: "};
     std::string title = "edit: "
         + config.title
         + "###"
         + std::to_string(reinterpret_cast<uint64_t>(&config));
 
-//    s.append("###");
-//    s.append(std::to_string(reinterpret_cast<uint64_t>(&config)));
 
     const auto flags = ImGuiWindowFlags_NoCollapse;
-//    if (!ImGui::Begin(s.c_str(), &open, ImVec2{450.f, 350.f}, -1.0f, flags)) {
     if (!ImGui::Begin(title.c_str(), nullptr, ImVec2{450.f, 350.f}, -1.0f, flags)) {
         ImGui::End();
         return;
@@ -98,6 +94,8 @@ bool EditorPupper::is_filtered(const Meta& meta) {
         && name.find(config.filter.pattern) == std::string::npos;
 }
 
+//ImVec4 color::header = ImVec4{0.280f, 0.685f, 0.677f, 1.f};
 ImVec4 color::header = ImVec4{.25f, .75f, .9f, 1.f};
 ImVec4 color::begin = ImVec4{0.454f, 0.551f, 0.505f, 1.f};
-ImVec4 color::object = ImVec4{0.204f, 0.651f, 0.400f, 1.f};
+ImVec4 color::object = ImVec4(0.540f, 0.861f, 0.867f, 1.000f);
+//ImVec4 color::object = ImVec4{0.204f, 0.651f, 0.400f, 1.f};

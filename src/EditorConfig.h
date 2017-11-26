@@ -10,6 +10,6 @@ struct EditorConfig {
     };
 
     std::string title;
-    Filter filter;
+    Filter filter = {};
 };
 

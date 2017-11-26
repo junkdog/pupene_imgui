@@ -146,12 +146,6 @@ static void ImGui_ImplSdlGL3_SetClipboardText(void*, const char* text)
     SDL_SetClipboardText(text);
 }
 
-static void key_down(const SDL_Keysym& key) {
-    auto c = static_cast<ImWchar>(key.sym & ~SDLK_SCANCODE_MASK);
-    if (std::isprint(c))
-        ImGui::GetIO().AddInputCharacter(c);
-}
-
 bool ImGui_ImplSdlGL3_ProcessEvent(SDL_Event* event,
                                    key_callback& callback)
 {
@@ -162,8 +156,7 @@ bool ImGui_ImplSdlGL3_ProcessEvent(SDL_Event* event,
     }
 
     ImGuiIO& io = ImGui::GetIO();
-    switch (event->type)
-    {
+    switch (event->type) {
         case SDL_MOUSEWHEEL: {
             if (event->wheel.y > 0)
                 g_MouseWheel = 1;
@@ -182,10 +175,8 @@ bool ImGui_ImplSdlGL3_ProcessEvent(SDL_Event* event,
             io.AddInputCharactersUTF8(event->text.text);
             return true;
         }
-        case SDL_KEYDOWN: {
-            key_down(event->key.keysym);
+        case SDL_KEYDOWN:
             [[fallthrough]];
-        }
         case SDL_KEYUP: {
             int key = event->key.keysym.sym & ~SDLK_SCANCODE_MASK;
             io.KeysDown[key] = (event->type == SDL_KEYDOWN);

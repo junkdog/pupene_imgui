@@ -7,7 +7,6 @@
 #include <SDL2/SDL_video.h>
 #include <SDL2/SDL.h>
 #include <GL/glew.h>
-#include <imgui/imgui.h>
 #include "imgui_impl_sdl_gl3.h"
 #include "EditorPupper.h"
 
@@ -120,8 +119,8 @@ static void update_styling(float hue_shift, float saturation_shift, float value_
     }
 }
 
-static ImVec4 alpha(ImVec4 rgba, float alpha) {
-    return ImVec4(rgba.x, rgba.y, rgba.z, alpha);
+bool file_exists(const std::string& file) {
+    return static_cast<bool>(std::ifstream(file));
 }
 
 
@@ -134,35 +133,15 @@ static void init_imgui(SDL_Window* window) {
     config.OversampleH = 3;
     config.OversampleV = 2;
     config.GlyphExtraSpacing.x = 1.0f;
-    io.Fonts->AddFontFromFileTTF("../../SourceCodePro-Semibold.ttf", 14.0f, &config);
+
+    auto file = "./SourceCodePro-Semibold.ttf";
+    if (file_exists(file)) {
+        io.Fonts->AddFontFromFileTTF(file, 14.0f, &config);
+    } else {
+        std::cerr << "Font not found in current directory: " << file << std::endl;
+    }
 
     update_styling(0.12f, 0.f, 0.f);
-
-    const std::array<ImVec4, 5> greens = {{
-        {0.643f, 0.953f, 0.282f, 1.f},
-        {0.565f, 0.827f, 0.259f, 1.f},
-        {0.408f, 0.596f, 0.192f, 1.f},
-        {0.259f, 0.373f, 0.125f, 1.f},
-        {0.102f, 0.145f, 0.510f, 1.f}
-    }};
-
-    const std::array<ImVec4, 5> yellows = {{
-        {0.906f, 0.988f, 0.294f, 1.f},
-        {0.820f, 0.890f, 0.278f, 1.f},
-        {0.592f, 0.643f, 0.208f, 1.f},
-        {0.369f, 0.400f, 0.137f, 1.f},
-        {0.145f, 0.157f, 0.550f, 1.f}
-    }};
-
-    const std::array<ImVec4, 5> cyan = {{
-        {0.255f, 0.859f, 0.518f, 1.f},
-        {0.204f, 0.651f, 0.400f, 1.f},
-        {0.153f, 0.471f, 0.290f, 1.f},
-        {0.980f, 0.291f, 0.180f, 1.f},
-        {0.390f, 0.114f, 0.710f, 1.f}
-    }};
-
-
 }
 
 static SDL_Window* create_window() {
@@ -193,43 +172,34 @@ bool poll_events(std::function<void(bool, int)>& callback) {
             done = true;
     }
 
-//    auto io = ImGui::GetIO();
-//    static bool capture_text = false;
-//    if (!capture_text && io.WantTextInput) {
-//        capture_text = true;
-//        SDL_StartTextInput();
-//    } else if (capture_text && !io.WantTextInput) {
-//        capture_text = false;
-//        SDL_StopTextInput();
-//    }
-
     return done;
 }
 
-bool render_frame(SDL_Window* window) {
+template <typename Fn>
+void render_frame(SDL_Window* window, Fn&& fn) {
+    ImGui_ImplSdlGL3_NewFrame(window);
+
+    fn();
+
     glViewport(0, 0, (int)ImGui::GetIO().DisplaySize.x, (int)ImGui::GetIO().DisplaySize.y);
     glClearColor(0.4, 0.5, 0.4, 1.0);
     glClear(GL_COLOR_BUFFER_BIT);
     ImGui::Render();
     SDL_GL_SwapWindow(window);
-
-    return false;
 }
 
 namespace ui::widget {
 
     template <typename T>
-    void object_editor(T& t,
-                       EditorConfig& config,
-                       bool debug = false) {
+    void object_editor(T& t, EditorConfig& config) {
         auto pupper = EditorPupper{config};
-        do_pup(pupper, t, debug);
+        pupene::pup(pupper, t, {});
         pupper.flush();
     }
 }
 
-int main () {
-    auto display = create_display();
+int main() {
+    create_display();
     SDL_Window* window = create_window();
 
     SDL_GLContext gl = SDL_GL_CreateContext(window);
@@ -237,65 +207,25 @@ int main () {
 
     init_imgui(window);
 
-    auto vec = ImVec2{10.0, 20.0};
-    auto vec2 = vec2f{10.0, 20.0};
-    auto vec2b = vec2i{10, 20};
-
-
-    auto vec22 = vec22fi{{10.0f, 4.0f}, {3, 4}};
     auto ct = complex_thing{};
-
-    auto color = Color{1.f, 0.f, 0.f, 1.f};
-
-    float h, s, v;
 
     auto config = EditorConfig{"object"};
     config.filter.pattern.reserve(50);
-    auto config2 = EditorConfig{"object view"};
-    config2.filter.pattern.reserve(50);
 
     auto cconfig = EditorConfig{"config instance"};
     cconfig.filter.pattern.reserve(50);
 
-//    std::function<void(bool,int)> key_callback = [&config](bool type_key_down, int key) {
     std::function<void(bool, int)> key_callback = [&config](bool type_key_down, int key) {
         process_shortcuts(config, type_key_down, key);
     };
 
     while (!poll_events(key_callback)) {
-//        update(config);
+        render_frame(window, [&ct, &config, &cconfig]() {
+//            ImGui::ShowTestWindow(nullptr);
 
-        // concluded by render_frame()
-        ImGui_ImplSdlGL3_NewFrame(window);
-
-        bool yes = true;
-        ImGui::ShowTestWindow(&yes);
-
-        ui::widget::object_editor(ct, config);
-        ui::widget::object_editor(ct, config2);
-        ui::widget::object_editor(config, cconfig);
-
-//        ImGui::Begin("palette shifter", nullptr);
-//        ImGui::PushItemWidth(ImGui::GetContentRegionAvailWidth());
-//        ImGui::SliderFloat("H", &h,  0.f, 1.f);
-//        ImGui::SliderFloat("S", &s, -1.f, 1.f);
-//        ImGui::SliderFloat("V", &v, -1.f, 1.f);
-//        ImGui::PopItemWidth();
-//        ImGui::End();
-
-//        ImGui::Begin("row colors", nullptr);
-//        const auto flags = ImGuiColorEditFlags_Float
-//                           | ImGuiColorEditFlags_RGB
-//                           | ImGuiColorEditFlags_HSV;
-//        ImGui::ColorEdit4("header", &color::header.x, flags);
-//        ImGui::ColorEdit4("begin", &color::begin.x, flags);
-//        ImGui::ColorEdit4("object", &color::object.x, flags);
-//        ImGui::End();
-
-
-        render_frame(window);
-
-        update_styling(h, s, v);
+            ui::widget::object_editor(ct, config);
+            ui::widget::object_editor(config, cconfig);
+        });
     }
 
     cleanup(window, gl);

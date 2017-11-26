@@ -34,7 +34,7 @@ struct complex_thing {
     int32_t integer;
     uint8_t byte;
     Color color;
-    std::string hallo = "omg";
+    std::string hallo = "hi there";
 };
 
 namespace pupene::fns {

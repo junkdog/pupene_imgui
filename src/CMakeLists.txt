@@ -15,6 +15,12 @@ install(
     TARGETS example
     RUNTIME DESTINATION bin)
 
+install(
+    FILES
+        ${CMAKE_SOURCE_DIR}/SourceCodePro-Semibold.ttf
+        ${CMAKE_SOURCE_DIR}/SourceCodePro-license.txt
+    DESTINATION bin)
+
 add_custom_target(
     valgrind
     COMMAND valgrind

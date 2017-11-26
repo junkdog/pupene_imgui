@@ -29,21 +29,27 @@ conan_cmake_run(
 
 ### compiler settings
 set(CMAKE_CXX_STANDARD 17)
-add_compile_options(
-    -Wall
-    -Wextra
-    -Wpedantic
-    -Wabstract-final-class
-    -Wabstract-vbase-init
-    -Wauto-import
-    -Wdouble-promotion
-    -Wfloat-conversion
-    -Wfloat-equal
-    -Wheader-hygiene
-    -Widiomatic-parentheses
-    -Wimplicit-fallthrough
-    -Winconsistent-missing-override
-    -fno-omit-frame-pointer)
 
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL Clang)
+    add_compile_options(
+        -Wall
+        -Wextra
+        -Wpedantic
+        -Wabstract-final-class
+        -Wabstract-vbase-init
+        -Wauto-import
+        -Wdouble-promotion
+        -Wfloat-conversion
+        -Wfloat-equal
+        -Wheader-hygiene
+        -Widiomatic-parentheses
+        -Wimplicit-fallthrough
+        -Winconsistent-missing-override
+        -fno-omit-frame-pointer)
+elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL gcc)
+    add_compile_options(
+        -Wall
+        -fno-omit-frame-pointer)
+endif()
 ### build it
 add_subdirectory(src)
