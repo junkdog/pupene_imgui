@@ -19,10 +19,13 @@ struct complex_thing {
 };
 ```
 
-... and the UI:
+Called every frame:
+
+```cpp
+ui::widget::object_editor(object, config);
+```
 
 ![pupene_imgui demo](pupene_imgui.gif?raw=true "UI")
-
 
 
 ### A quick intro
